@@ -1,0 +1,12 @@
+services:
+    chat:
+        build: .
+        ports:
+            - "5200:5000"
+        deploy:
+            resources:
+                reservations:
+                    devices:
+                        - driver: nvidia
+                          count: all
+                          capabilities: [ gpu ]

@@ -1,0 +1,7 @@
+Flask==3.1.0
+huggingface-hub==0.29.2
+langchain-huggingface==0.1.2
+python-dotenv==1.0.1
+tokenizers==0.21.0
+torch==2.5.0 --index-url https://download.pytorch.org/whl/cu126
+transformers==4.49.0
