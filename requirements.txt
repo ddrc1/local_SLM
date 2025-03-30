@@ -5,3 +5,4 @@ python-dotenv==1.0.1
 tokenizers==0.21.0
 torch==2.5.0 --index-url https://download.pytorch.org/whl/cu126
 transformers==4.49.0
+langgraph==0.3.21
