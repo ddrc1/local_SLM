@@ -3,3 +3,9 @@ services:
         build: .
         ports:
             - "5200:5000"
+        networks:
+            - llm_network
+
+networks:
+    llm_network:
+        external: true
