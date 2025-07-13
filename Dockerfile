@@ -1,7 +1,7 @@
-FROM nvidia/cuda:12.6.3-runtime-ubuntu22.04
+FROM python:3.13-alpine3.22
 
-# Install dependencies
-RUN apt-get update && apt-get install -y \
+# Upgrade system packages and install dependencies
+RUN apt-get update && apt-get upgrade -y && apt-get install -y \
     python3 \
     python3-pip \
     && rm -rf /var/lib/apt/lists/*
@@ -17,4 +17,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Run the application
 EXPOSE 5000
-CMD ["flask", "--app", "main.py", "run", "--host", "0.0.0.0"]
+CMD ["gunicorn", "-w", "-b", "0.0.0.0:5000", "main:app"]
