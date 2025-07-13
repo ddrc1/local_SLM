@@ -1,15 +1,10 @@
-import random
-from typing import Dict, List, Literal, Optional
-from langgraph.graph import StateGraph, START, END, MessagesState
-from langchain_core.messages import SystemMessage, HumanMessage
-from .agent import call
+from langgraph.graph import StateGraph, START, END
+from langgraph.graph.state import CompiledStateGraph
+from langchain_core.messages import AnyMessage, HumanMessage
+from graph.states.graph_state import GraphState
+from graph.nodes.update_message import update_message
+from graph.nodes.agent import agent
 
-class CustomMessagesState(MessagesState):
-    temperature: Optional[float] = 0.5
-
-def call_model(message: CustomMessagesState) -> MessagesState:
-    response = call(messages=message['messages'], temperature=message['temperature'])
-    return {"messages": response}
 
 # def answer_feedback(message: MessagesState) -> MessagesState:
 #     validate_prompt = """Vou are a quality assurance bot.
@@ -29,28 +24,25 @@ def call_model(message: CustomMessagesState) -> MessagesState:
 #     else:
 #         print("Reruning the model call...")
 #         return "call_model"
-graph = StateGraph(CustomMessagesState)
-graph.add_node(call_model)
+graph: StateGraph = StateGraph(GraphState)
+graph.add_node(node="agent", action=agent)
 # graph.add_node(answer_feedback)
+graph.add_node(node="update_message", action=update_message)
 
-graph.add_edge(START, "call_model")
+graph.add_edge(START, "agent")
 # graph.add_edge("call_model", "answer_feedback")
 # graph.add_conditional_edges("answer_feedback", validate_answer, ['call_model', END])
-graph.add_edge("call_model", END)
+graph.add_edge(start_key="agent", end_key="update_message")
+graph.add_edge("update_message", END)
 
-graph = graph.compile()
-
-def run_graph(messages: List[Dict["role", "content"]], temperature: float = 0.5):
-    response = graph.invoke({"messages": messages, "temperature": temperature})
-    return response
+compiled_graph: CompiledStateGraph = graph.compile()
 
 if __name__ == "__main__":
+
     while True:
         user_input = input("Write your question: ")
 
-    # The config is the **second positional argument** to stream() or invoke()!
-        response = graph.stream({"messages": [SystemMessage("You are a helpful chatbot. Think step by step."), 
-                                            HumanMessage(user_input)]}, stream_mode="values")
+        response = compiled_graph.stream({"messages": [HumanMessage(user_input)]}, stream_mode="values")
         for event in response:
             # print(event)
             event["messages"][-1].pretty_print()

@@ -1,9 +1,10 @@
-from typing import Dict
+from flask.wrappers import Request
 
-def validate_request(request: Dict) -> bool:
-    request_data = request.json
+def validate_request(request: Request) -> dict:
+    request_data: dict = request.json # type: ignore
+    print(type(request_data))
 
-    expected_fields = {"messages", "temperature"}
+    expected_fields = {"messages", "temperature", "reasoning"}
     extra_fields = set(request_data.keys()) - expected_fields
     if extra_fields:
         raise ValueError(f"Request contains unexpected fields: {', '.join(extra_fields)}")
@@ -27,7 +28,7 @@ def validate_request(request: Dict) -> bool:
     if "temperature" in request_data:
         if not isinstance(request_data["temperature"], (int, float)):
             raise ValueError("'temperature' field must be a number")
-        if request_data["temperature"] <= 0 or request_data["temperature"] > 1:
+        if request_data["temperature"] < 0 or request_data["temperature"] > 1:
             raise ValueError("'temperature' field must be between 0 and 1")
     
     return request_data
